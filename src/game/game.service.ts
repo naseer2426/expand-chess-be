@@ -1,7 +1,8 @@
 import { Injectable,Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository} from "typeorm";
-import { Game, ExtendConfig, GameType, GameStatusNotStarted} from "./game.entity";
+import { Game} from "./game.entity";
+import {ExtendConfig, GameType, GameStatusNotStarted} from "./game.types"
 import { tryCatch } from "src/utils/try-catch";
 import { Chess, GameStatus } from "chessjs-expandable";
 
@@ -17,21 +18,19 @@ export class GameService {
     ) { }
 
     async createOpenGame(
-        creatorId:string, 
-        creatorColor: {randomColor: boolean, fixedColor?: "black"|"white"},
-        extendConfig: ExtendConfig
+        creatorId:string, randomColor: boolean, 
+        extendConfig: ExtendConfig,fixedColor?: "black"|"white",
     ): Promise<{id:string|null, error:string|null}> {
+
         const game: Game = {
-            id:"",
             gameType:GameType.OPEN,
             gameStatus:GameStatusNotStarted,
             currentFen:startingFen,
-            startTime:Date.now(),
             extendConfig:extendConfig,
             moveDetails:[]
         }
 
-        const color = creatorColor.randomColor ? (Math.random() < 0.5 ? "black" : "white") : creatorColor.fixedColor!
+        const color = randomColor ? (Math.random() < 0.5 ? "black" : "white") : fixedColor!
         if (color === "black") {
             game.blackPlayerId = creatorId
         }
@@ -44,19 +43,17 @@ export class GameService {
         }
         return {id:result.data.id, error:null}
     }
-    
+    // not supported for will probably remove later
     async createPrivateGame(
-        creatorId: string,
-        opponentId: string,
-        creatorColor: {randomColor: boolean, fixedColor?: "black"|"white"},
-        extendConfig: ExtendConfig
+        creatorId: string,opponentId: string,
+        creatorColor: {randomColor: boolean, fixedColor?: "black"|"white"},extendConfig: ExtendConfig
     ): Promise<{id:string|null, error:string|null}> {
+
         const game: Game = {
             id:"",
             gameType:GameType.OPEN,
             gameStatus:GameStatusNotStarted,
             currentFen:startingFen,
-            startTime:Date.now(),
             extendConfig:extendConfig,
             moveDetails:[]
         }
@@ -78,7 +75,7 @@ export class GameService {
         return {id:result.data.id, error:null}
     }
 
-    async move(gameId: string, move:string, moveNumber:number):Promise<{error:string|null}> {
+    async move(gameId: string, move:string, moveNumber:number):Promise<{error:string|null,gameStatus?:GameStatus}> {
         const game = await tryCatch(this.gameRepository.findOneBy({id:gameId}))
         if (game.error) {
             return {error:game.error.message}
@@ -89,7 +86,7 @@ export class GameService {
         if (game.data.moveDetails.length+1 !== moveNumber) {
             this.logger.debug(`move number ${moveNumber} recieved for game ${gameId} but move number is ${game.data.moveDetails.length+1}`)
             // not returning error since this can happen when the retry request from client is recieved after the game has progressed, we can safely ignore this
-            return {error:null}
+            return {error:null,gameStatus:game.data.gameStatus}
         }
         const chess = new Chess(
             game.data.currentFen,
@@ -120,7 +117,7 @@ export class GameService {
         if (result.error) {
             return {error:result.error.message}
         }
-        return {error:null}
+        return {error:null,gameStatus:chess.getGameStatus()}
     }
     async startGame(gameId:string):Promise<{error:string|null, game:Game|null}> {
         const game = await tryCatch(this.gameRepository.findOneBy({id:gameId}))
@@ -130,7 +127,10 @@ export class GameService {
         if (game.data.gameStatus !== GameStatusNotStarted) {
             return {error:"game not in not started state", game:null}
         }
-        const result = await tryCatch(this.gameRepository.update(gameId, {gameStatus:GameStatus.IN_PROGRESS}))
+        const result = await tryCatch(this.gameRepository.update(gameId, {
+            gameStatus:GameStatus.IN_PROGRESS,
+            startTime:Date.now(),
+        }))
         if (result.error) {
             return {error:result.error.message, game:null}
         }
@@ -159,6 +159,9 @@ export class GameService {
         const game = await tryCatch(this.gameRepository.findOneBy({id:gameId}))
         if (game.error) {
             return {error:game.error.message, game:null}
+        }
+        if (!game.data) {
+            return {error:"game not found", game:null}
         }
         return {error:null, game:game.data}
     }
