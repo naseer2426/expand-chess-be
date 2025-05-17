@@ -4,6 +4,9 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Game } from './game/game.entity';
 import { PingerModule } from './pinger/pinger.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,5 +25,7 @@ import { PingerModule } from './pinger/pinger.module';
     }),
     PingerModule
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
