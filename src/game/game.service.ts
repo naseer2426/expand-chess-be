@@ -25,54 +25,23 @@ export class GameService {
         const game: Game = {
             gameType:GameType.OPEN,
             gameStatus:GameStatusNotStarted,
+            creatorId,
+            creatorColor: randomColor?"random":fixedColor,
             currentFen:startingFen,
             extendConfig:extendConfig,
-            moveDetails:[]
+            moveDetails:[],
         }
 
-        const color = randomColor ? (Math.random() < 0.5 ? "black" : "white") : fixedColor!
-        if (color === "black") {
-            game.blackPlayerId = creatorId
-        }
-        else {
-            game.whitePlayerId = creatorId
-        }
+        
         const result = await tryCatch(this.gameRepository.save(game))
         if (result.error) {
             return {id:null, error:result.error.message}
         }
         return {id:result.data.id, error:null}
     }
-    // not supported for will probably remove later
-    async createPrivateGame(
-        creatorId: string,opponentId: string,
-        creatorColor: {randomColor: boolean, fixedColor?: "black"|"white"},extendConfig: ExtendConfig
-    ): Promise<{id:string|null, error:string|null}> {
 
-        const game: Game = {
-            id:"",
-            gameType:GameType.OPEN,
-            gameStatus:GameStatusNotStarted,
-            currentFen:startingFen,
-            extendConfig:extendConfig,
-            moveDetails:[]
-        }
-
-        const color = creatorColor.randomColor ? (Math.random() < 0.5 ? "black" : "white") : creatorColor.fixedColor!
-        if (color === "black") {
-            game.blackPlayerId = creatorId
-            game.whitePlayerId = opponentId
-        }
-        else {
-            game.whitePlayerId = creatorId
-            game.blackPlayerId = opponentId
-        }       
-
-        const result = await tryCatch(this.gameRepository.save(game))
-        if (result.error) {
-            return {id:null, error:result.error.message}
-        }
-        return {id:result.data.id, error:null}
+    async save(game:Game):Promise<{error?:string,game?:Game}> {
+        return await tryCatch(this.gameRepository.save(game))
     }
 
     async move(gameId: string, move:string, moveNumber:number):Promise<{error:string|null,gameStatus?:GameStatus}> {
@@ -164,5 +133,47 @@ export class GameService {
             return {error:"game not found", game:null}
         }
         return {error:null, game:game.data}
+    }
+
+    assignColor(playerId:string, game:Game):Game {
+        // opponent color already assigned
+        if (game.whitePlayerId) {
+            game.blackPlayerId = playerId
+            return game
+        }
+        if (game.blackPlayerId) {
+            game.whitePlayerId = playerId
+            return game
+        }
+        // first assign
+        if (game.creatorColor == "white") {
+            if (playerId == game.creatorColor) {
+                game.whitePlayerId = playerId
+            } else {
+                game.blackPlayerId = playerId
+            }
+            return game
+        }
+        if (game.creatorColor == "black") {
+            if (playerId == game.creatorColor) {
+                game.blackPlayerId = playerId
+            } else {
+                game.whitePlayerId = playerId
+            }
+            return game
+        }
+        if (Math.random() < 0.5) {
+            game.whitePlayerId = playerId
+            return game
+        } 
+        game.blackPlayerId = playerId
+        return game
+    }
+
+    readyToStart(game:Game):boolean {
+        if (game.whitePlayerId && game.blackPlayerId) {
+            return true
+        }
+        return false
     }
 }

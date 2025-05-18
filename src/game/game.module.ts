@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         Game
     ])],
     providers:[GameService],
-    controllers:[GameController]
+    controllers:[GameController],
+    exports: [GameService]
 })
 export class GameModule {}
