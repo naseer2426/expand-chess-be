@@ -7,6 +7,7 @@ import { PingerModule } from './pinger/pinger.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import { GameModule } from './game/game.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +24,8 @@ import { AppService } from './app.service';
       entities: [Game],
       synchronize: true,
     }),
-    PingerModule
+    PingerModule,
+    GameModule
   ],
   controllers: [AppController],
   providers: [AppService],

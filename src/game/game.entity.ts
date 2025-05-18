@@ -1,20 +1,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { GameStatus } from 'chessjs-expandable';
-
-export enum GameType {
-    OPEN = 'OPEN',
-    PRIVATE = 'PRIVATE',
-}
-
-export const GameStatusNotStarted = 'NOT_STARTED'
-
-// not started is only something I need to worry about in the backend so I am not adding it in the chessjs-expandable package
-export type BackendGameStatus = GameStatus | 'NOT_STARTED' 
+import { GameType, BackendGameStatus, ExtendConfig, MoveDetail } from './game.types'; 
 
 @Entity()
 export class Game {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    id?: string;
 
     @Column({
         nullable:true
@@ -35,8 +25,11 @@ export class Game {
     @Column()
     currentFen: string; // should contain everything to rebuild board state
 
-    @Column()
-    startTime: number
+    @Column({
+        type:'bigint',
+        nullable:true
+    })
+    startTime?: number
 
     @Column({
         type: 'jsonb',
@@ -49,14 +42,3 @@ export class Game {
     moveDetails:MoveDetail[]
 }
 
-export type MoveDetail = {
-    move:string
-    playedAtMs: number // unix timestamp of when game move was played
-}
-
-export type ExtendConfig ={
-    horizontalAddUnit: {x:number, y:number}
-    verticalAddUnit: {x:number, y:number}
-    horizontalExtendLimit: number
-    verticalExtendLimit: number
-}
