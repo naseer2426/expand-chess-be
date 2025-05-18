@@ -6,10 +6,12 @@ import { Game } from './game/game.entity';
 import { PingerModule } from './pinger/pinger.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { GameModule } from './game/game.module';
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal:true,
     }), 
