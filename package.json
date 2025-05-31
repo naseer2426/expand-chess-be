@@ -29,7 +29,7 @@
     "@nestjs/schedule": "^6.0.0",
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.0.12",
-    "chessjs-expandable": "^0.0.7",
+    "chessjs-expandable": "^0.0.10",
     "pg": "^8.14.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
