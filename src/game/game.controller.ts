@@ -22,13 +22,6 @@ export class GameController {
     async createGame(
         @Body() req: CreateGameRequest,
     ): Promise<{ id: string | null; error: string | null }> {
-        const env = this.configService.get<string>('NODE_ENV');
-        if (env == 'production') {
-            return {
-                id: null,
-                error: 'APIs not accessible in production',
-            };
-        }
         return await this.gameService.createOpenGame(
             req.creatorId,
             req.randomColor,
