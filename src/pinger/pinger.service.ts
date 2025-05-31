@@ -9,7 +9,7 @@ export class PingerService {
     private readonly logger = new Logger(PingerService.name);
     constructor(
         private readonly httpService: HttpService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
     ) {}
     @Cron('0 */14 * * * *') // Every 14 minutes
     async ping() {
@@ -17,6 +17,8 @@ export class PingerService {
         if (!selfPingUrl) {
             return;
         }
-        this.httpService.get(selfPingUrl).subscribe((resp)=>{this.logger.debug(resp.data)});
+        this.httpService.get(selfPingUrl).subscribe((resp) => {
+            this.logger.debug(resp.data);
+        });
     }
 }
