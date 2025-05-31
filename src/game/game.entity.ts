@@ -1,5 +1,10 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { GameType, BackendGameStatus, ExtendConfig, MoveDetail } from './game.types'; 
+import {
+    GameType,
+    BackendGameStatus,
+    ExtendConfig,
+    MoveDetail,
+} from './game.types';
 
 @Entity()
 export class Game {
@@ -7,18 +12,18 @@ export class Game {
     id?: string;
 
     @Column()
-    creatorId: string; 
+    creatorId: string;
 
     @Column()
-    creatorColor: "black" | "white" | "random"; 
+    creatorColor: 'black' | 'white' | 'random';
 
     @Column({
-        nullable:true // could be null if player has not connected yet
+        nullable: true, // could be null if player has not connected yet
     })
     whitePlayerId?: string; // could be user id for logged in user or devide id for non logged in user
 
     @Column({
-        nullable:true // could be null if player has not connected yet
+        nullable: true, // could be null if player has not connected yet
     })
     blackPlayerId?: string; // could be user id for logged in user or devide id for non logged in user
 
@@ -32,19 +37,18 @@ export class Game {
     currentFen: string; // should contain everything to rebuild board state
 
     @Column({
-        type:'bigint',
-        nullable:true
+        type: 'bigint',
+        nullable: true,
     })
-    startTime?: number
+    startTime?: number;
 
     @Column({
         type: 'jsonb',
     })
-    extendConfig: ExtendConfig
+    extendConfig: ExtendConfig;
 
     @Column({
         type: 'jsonb',
     })
-    moveDetails:MoveDetail[]
+    moveDetails: MoveDetail[];
 }
-

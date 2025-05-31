@@ -1,30 +1,26 @@
-import { BackendGameStatus, ExtendConfig } from "src/game/game.types"
+import { Game } from 'src/game/game.entity';
 
-export const EVENT_JOIN_GAME = "joinGame"
-export const EVENT_JOIN_GAME_RESP = "joinGameResp"
-export const EVENT_MOVE = "move"
+export const EVENT_JOIN_GAME = 'joinGame';
+export const EVENT_SYNC_MOVE = 'syncMove';
+export const EVENT_SYNC_GAME = 'syncGame';
 
 export type JoinGame = {
-    gameId: string
-    clientId: string
-}
+    gameId: string;
+    clientId: string;
+};
 
-export type GameState = {
-    fen:string
-    gameStatus: BackendGameStatus
-    extendConfig:ExtendConfig
-    // TODO: extend for clock state later
-}
+export type SyncGame =
+    | {
+          error: string;
+          game: null;
+      }
+    | {
+          error: null;
+          game: Game;
+      };
 
-export type JoinGameResp = {
-    error:string
-    gameState:null
-} | {
-    error:null
-    gameState: GameState
-}
-
-export type Move = {
-    move:string
-    gameId:string
-}
+export type SyncMove = {
+    move: string;
+    gameId: string;
+    moveNumber: number;
+};
